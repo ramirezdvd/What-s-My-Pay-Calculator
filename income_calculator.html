@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Work Pay Calculator</title>
+  <!-- Link to Google Fonts for a modern look -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset some default styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background: linear-gradient(120deg, #e0e7ff 0%, #fff 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 10px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 32px 0 rgba(80, 120, 200, 0.12);
+      padding: 36px 32px 28px 32px;
+      max-width: 400px;
+      width: 100%;
+      margin-top: 32px;
+      transition: box-shadow 0.2s;
+    }
+
+    .container:hover {
+      box-shadow: 0 10px 40px 0 rgba(80, 120, 200, 0.19);
+    }
+
+    h1 {
+      color: #234098;
+      font-size: 2.1rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .form-group {
+      margin-bottom: 26px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #334155;
+      font-size: 1.03rem;
+      font-weight: 500;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border: 1.5px solid #a5b4fc;
+      border-radius: 7px;
+      font-size: 1.1rem;
+      background-color: #f8fafc;
+      transition: border-color 0.2s;
+      outline: none;
+      margin-bottom: 4px;
+    }
+
+    input[type="number"]:focus {
+      border-color: #6366f1;
+      background: #eef2ff;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px 0;
+      background: linear-gradient(90deg, #5a67d8 0%, #6366f1 80%);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.18s;
+      margin-top: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #4f46e5 0%, #818cf8 100%);
+    }
+
+    .result {
+      margin-top: 26px;
+      font-size: 1.25rem;
+      color: #2563eb;
+      font-weight: 600;
+      min-height: 32px;
+      text-align: center;
+      transition: color 0.2s;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 20px 8px;
+      }
+      h1 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Main container for content -->
+  <div class="container">
+    <h1>Pay Calculator</h1>
+    <!-- Form input fields -->
+    <div class="form-group">
+      <label for="hoursWorked">Enter Total Hours Worked:</label>
+      <input type="number" id="hoursWorked" min="0" placeholder="e.g. 88" />
+    </div>
+    <div class="form-group">
+      <label for="otherDeductions">Enter Other Deductions ($):</label>
+      <input type="number" id="otherDeductions" min="0" placeholder="e.g. 15" />
+    </div>
+    <!-- Button to trigger calculation -->
+    <button onclick="calculatePay()">Calculate</button>
+    <!-- Display result -->
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    /**
+     * Calculates the user's pay after deductions.
+     * Considers base pay, overtime, tax, and additional deductions.
+     * Updates the result on the page.
+     */
+    function calculatePay() {
+      // Get the input values and parse to float
+      const hours = parseFloat(document.getElementById('hoursWorked').value);
+      const extraDeduction = parseFloat(document.getElementById('otherDeductions').value) || 0;
+
+      // Validate hours input
+      if (isNaN(hours) || hours < 0) {
+        document.getElementById('result').innerText = "Please enter a valid number of hours.";
+        return;
+      }
+
+      // Pay and deduction constants
+      const BASE_RATE = 14.42;         // Regular per-hour rate
+      const OVERTIME_RATE = 21.63;     // Overtime per-hour rate (over 80 hours)
+      const DEDUCTION_RATE = 0.192;    // 19.2% tax deduction
+      const FIXED_DEDUCTION = 25;      // Fixed deduction in dollars
+
+      // Calculate regular and overtime hours
+      const regularHours = Math.min(hours, 80);
+      const overtimeHours = Math.max(hours - 80, 0);
+
+      // Calculate gross and net pay
+      const basePay = regularHours * BASE_RATE;
+      const overtimePay = overtimeHours * OVERTIME_RATE;
+      const totalPay = basePay + overtimePay;
+      const afterTax = totalPay * (1 - DEDUCTION_RATE);
+      const finalPay = afterTax - extraDeduction - FIXED_DEDUCTION;
+
+      // Compose a detailed breakdown for the user
+      let breakdown = 
+        `Base Pay (up to 80h): $${basePay.toFixed(2)}\n` +
+        `Overtime Pay: $${overtimePay.toFixed(2)}\n` +
+        `Total Before Tax: $${totalPay.toFixed(2)}\n` +
+        `After 19.2% Tax: $${afterTax.toFixed(2)}\n` +
+        `Other Deductions: $${extraDeduction.toFixed(2)}\n` +
+        `Fixed Deduction: $${FIXED_DEDUCTION.toFixed(2)}\n\n` +
+        `Final Pay after all deductions: $${finalPay.toFixed(2)}`;
+
+      // Show the breakdown in a styled way (preserve line breaks)
+      document.getElementById('result').innerText = breakdown;
+    }
+  </script>
+</body>
+</html>
